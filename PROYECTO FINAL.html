@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ballena Aventura</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background: #e0f7fa;
+    }
+
+    .contenedor {
+      display: flex;
+      max-width: 1200px;
+      margin: auto;
+      padding: 20px;
+      gap: 20px;
+    }
+
+    .juego, .info {
+      flex: 1;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+		text-align: center; 
+    }
+
+    canvas {
+      width: 100%;
+      height: 200px;
+      display: block;
+    }
+
+    .info h2 {
+      color: #0326F6;
+		 text-align: center;
+    }
+
+    .info p {
+      line-height: 1.6;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <div class="contenedor">
+    <div class="juego">
+      <h2>Ballena Saltarina</h2>
+      <canvas id="gameCanvas" width="500" height="300"></canvas>
+    </div>
+
+    <div class="info">
+      <h2>Salvemos a las ballenas</h2>
+      <p>La iniciativa se convertiría en el punto de arranque que desencadenó un movimiento global para salvar a las ballenas, que transformaría la opinión mundial y daría lugar a la decisión de la Comisión Ballenera Internacional (CBI) en 1982 de aplicar una moratoria a la pesca comercial de ballenas. Gracias a ello, desde 1986 la caza comercial de ballenas está prohibida.</p>
+      <p>Esta acción de conservación sin precedentes supuso la recuperación del número de ballenas. A mediados de la década de 1950 solo había 450 ballenas jorobadas en el Atlántico suroccidental (frente a unas 27.000 en la década de 1830). Hoy esos cetáceos se han recuperado hasta alcanzar el 93% de su población anterior a la explotación de la especie. De hecho, se estima que la mayoría de las poblaciones de ballenas jorobadas se han recuperado casi por completo.</p>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    const fondoImg = new Image();
+    fondoImg.src = "FONDO MARINO-1.png";
+
+    const ballenaImg = new Image();
+    ballenaImg.src = "BALLENA.png";
+
+    const personaje = {
+      x: 50,
+      y: 240,
+      ancho: 50,
+      alto: 50,
+      velocidadY: 0,
+      gravedad: 1.2,
+      salto: -15,
+      enAire: false
+    };
+
+    const obstaculo = {
+      x: 400,
+      y: 250,
+      ancho: 30,
+      alto: 30
+    };
+
+    const pisoY = canvas.height - 10;
+    let teclas = {};
+
+    window.addEventListener("keydown", e => {
+      teclas[e.code] = true;
+      if (e.code === "Space" && !personaje.enAire) {
+        personaje.velocidadY = personaje.salto;
+        personaje.enAire = true;
+      }
+    });
+
+    window.addEventListener("keyup", e => {
+      teclas[e.code] = false;
+    });
+
+    function actualizar() {
+      if (teclas["ArrowRight"]) personaje.x += 4;
+      if (teclas["ArrowLeft"]) personaje.x -= 4;
+
+      personaje.velocidadY += personaje.gravedad;
+      personaje.y += personaje.velocidadY;
+
+      if (personaje.y + personaje.alto >= pisoY) {
+        personaje.y = pisoY - personaje.alto;
+        personaje.velocidadY = 0;
+        personaje.enAire = false;
+      }
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(fondoImg, 0, 0, canvas.width, canvas.height);
+
+      ctx.drawImage(ballenaImg, personaje.x, personaje.y, personaje.ancho, personaje.alto);
+
+     
+      ctx.fillStyle = "#ff5252";
+      ctx.fillRect(obstaculo.x, obstaculo.y, obstaculo.ancho, obstaculo.alto);
+
+      // Detectar colisión
+      if (
+        personaje.x < obstaculo.x + obstaculo.ancho &&
+        personaje.x + personaje.ancho > obstaculo.x &&
+        personaje.y < obstaculo.y + obstaculo.alto &&
+        personaje.y + personaje.alto > obstaculo.y
+      ) {
+        alert("¡La ballena chocó!");
+        personaje.x = 50;
+        personaje.y = 240;
+      }
+
+      requestAnimationFrame(actualizar);
+    }
+
+ 
+    let cargadas = 0;
+    function iniciarJuego() {
+      cargadas++;
+      if (cargadas === 2) actualizar();
+    }
+
+    fondoImg.onload = iniciarJuego;
+    ballenaImg.onload = iniciarJuego;
+  </script>
+</body>
+</html>
